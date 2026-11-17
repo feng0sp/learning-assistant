@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="按章节整理知识、理解原理、通过例题和生活类比学会新知识。你的本地个人学习助手。">
+  <title>知章 · 个人学习助手</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="app.js"></script>
+  <script defer src="course.js"></script>
+  <script defer src="rewards.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">跳到学习内容</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="学习导航">
+      <a class="brand" href="/" aria-label="知章首页"><span class="brand-mark">知</span><span>知章<small>个人学习助手</small></span></a>
+      <button class="button primary new-button" id="new-chapter"><span aria-hidden="true">＋</span> 开始新章节</button>
+      <button id="toggle-navigation" class="navigation-toggle" type="button" aria-controls="sidebar-tools" aria-expanded="false"><span>章节与工具</span><span id="navigation-toggle-label">展开 ↓</span></button>
+      <div id="sidebar-tools" class="sidebar-tools">
+      <button id="open-review" class="review-nav" type="button"><span>错题复习</span><span id="review-count">0</span></button>
+      <div class="history-filters"><label class="sr-only" for="chapter-search">搜索课程、教材或章节</label><input id="chapter-search" type="search" placeholder="搜索课程、教材或章节" maxlength="300"><label class="sr-only" for="chapter-filter">筛选章节状态</label><select id="chapter-filter"><option value="all">全部章节</option><option value="unfinished">尚未学完</option><option value="completed">已学完</option></select></div>
+      <div class="sidebar-heading"><span>我的学习</span><span id="chapter-count">0</span></div>
+      <p id="history-result" class="history-result" role="status" hidden></p>
+      <nav id="chapter-list" class="chapter-list" aria-label="章节列表"><p class="sidebar-empty">正在读取章节…</p></nav>
+      <div id="history-pages" class="history-pages" aria-label="章节列表翻页" hidden><button id="history-prev" type="button" aria-label="上一页章节">←</button><span id="history-page-label" role="status"></span><button id="history-next" type="button" aria-label="下一页章节">→</button></div>
+      <div class="sidebar-bottom">
+        <div class="local-label"><span class="tiny-icon" aria-hidden="true">⌂</span><span>学习记录保存在本机</span></div>
+        <button id="open-data" class="settings-button" type="button"><span aria-hidden="true">⇅</span> 备份与恢复</button>
+        <button id="open-settings" class="settings-button"><span aria-hidden="true">⚙</span> 模型设置 <span id="settings-state" class="settings-state">未配置</span></button>
+      </div>
+      </div>
+    </aside>
+    <div class="workspace">
+      <header class="topbar"><div class="breadcrumb"><span id="breadcrumb-course">我的学习</span><span aria-hidden="true">/</span><strong>章节学习</strong></div><div class="reading-tools"><button id="toggle-focus" class="text-button" type="button" aria-pressed="false">专注阅读</button><button id="open-rewards" class="reward-pill" type="button">◇ <span id="reward-pill-label">学习成长</span></button></div></header>
+      <div id="job-banner" class="job-banner" role="status" hidden></div>
+      <div id="load-error" class="load-error" role="alert" hidden><span id="load-error-message"></span><button id="retry-load" class="button secondary small" type="button">重新加载</button></div>
+      <p id="navigation-status" class="navigation-status" role="status" hidden>正在打开章节，当前内容仍可阅读…</p>
+      <main id="main" tabindex="-1">
+        <section class="course-launch" aria-label="计算机网络课程入口">
+          <div><span class="section-kicker">理解原理，也练会解题</span><strong>微课堂前三章学习专区</strong><p>12 小节 · 120 道选择题逐项解析 · 离线可学</p></div>
+          <div class="course-actions"><button id="open-microclass" class="button primary" type="button">微课堂前三章 →</button><button id="open-course" class="button secondary" type="button">进入完整课程</button><button id="open-network-labs" class="button secondary" type="button">计算实验室</button></div>
+        </section>
+        <nav id="course-reading-nav" class="course-reading-nav" aria-label="课程课时导航" hidden><button id="course-previous" class="text-button" type="button">← 上一课</button><span id="course-position"></span><button id="course-next" class="text-button" type="button">下一课 →</button></nav>
+        <div class="chapter-heading">
+          <div><div class="eyebrow" id="chapter-eyebrow">学习手记</div><h1 id="chapter-title">正在打开学习空间…</h1><div class="chapter-meta"><span id="chapter-book"></span><span id="mode-badge" class="badge"></span></div></div>
+          <button id="mark-complete" class="button secondary" disabled>标记已学完</button>
+        </div>
+        <div id="demo-notice" class="notice" hidden><span class="notice-icon" aria-hidden="true">i</span><p>这是一份可直接体验的教学示例，非教材原文。点击「开始新章节」，整理你正在学的内容。</p></div>
+        <div id="topic-notice" class="notice" hidden><span class="notice-icon" aria-hidden="true">i</span><p>这是根据章节标题生成的通用讲解，尚未读取教材原文。需要与教材对应时，请上传章节资料。</p></div>
+        <div class="study-layout">
+          <div class="reading-column">
+            <section class="overview-card" aria-labelledby="overview-title"><div class="section-kicker">先建立整体认识</div><h2 id="overview-title">这一章，主要在讲什么？</h2><p id="overview-text">正在读取章节内容。</p><div id="prerequisites" class="prerequisites"></div></section>
+            <div class="study-tabs" role="tablist" aria-label="学习内容">
+              <button role="tab" id="tab-knowledge" aria-controls="study-content" aria-selected="true" data-tab="knowledge">知识点 <span id="knowledge-count"></span></button>
+              <button role="tab" id="tab-examples" aria-controls="study-content" aria-selected="false" tabindex="-1" data-tab="examples">例题解析</button>
+              <button role="tab" id="tab-analogies" aria-controls="study-content" aria-selected="false" tabindex="-1" data-tab="analogies">生活类比</button>
+              <button role="tab" id="tab-quiz" aria-controls="study-content" aria-selected="false" tabindex="-1" data-tab="quiz">自测练习</button>
+              <button role="tab" id="tab-sources" aria-controls="study-content" aria-selected="false" tabindex="-1" data-tab="sources">资料来源</button>
+            </div>
+            <section id="study-content" class="study-content" role="tabpanel" aria-labelledby="tab-knowledge" tabindex="0" aria-busy="true"><div class="skeleton"></div><div class="skeleton short"></div></section>
+            <section class="notes-card" aria-labelledby="notes-heading"><div class="card-heading"><h2 id="notes-heading">我的理解与笔记</h2><span id="notes-status" role="status"></span></div><label class="sr-only" for="notes">本章笔记</label><textarea id="notes" disabled rows="4" maxlength="30000" placeholder="用自己的话写下来，知识才真正属于你。"></textarea><div class="notes-footer"><a id="export-link" class="text-link" href="#">导出本章 Markdown</a><button id="print-chapter" type="button" class="text-button">打印学习讲义</button><button id="merge-notes" class="button secondary small" hidden>合并另一窗口的笔记</button><button id="save-notes" disabled class="button secondary small">保存笔记</button></div></section>
+          </div>
+          <aside class="companion-column" aria-label="学习帮助">
+            <section class="objectives-card"><div class="section-kicker">带着目标去学</div><h2>学完后，你应该能</h2><ol id="objectives"></ol><div class="chapter-progress"><span id="progress-label">还未完成自测</span><span id="progress-number">0%</span></div><progress id="quiz-progress" max="100" value="0" aria-label="自测完成度"></progress></section>
+            <section class="chat-card" aria-labelledby="chat-heading"><div class="chat-heading"><span class="assistant-symbol" aria-hidden="true">✦</span><div><h2 id="chat-heading">陪你想明白</h2><p>围绕这一章，继续追问</p></div></div><div class="suggestions"><button disabled data-question="请用更简单的话解释本章最重要的概念。">再讲简单一点</button><button disabled data-question="这一章最容易混淆的两个概念是什么？请对比解释。">区分易混淆概念</button></div><button id="older-messages" type="button" class="text-button older-messages" hidden>查看更早的问答</button><div id="messages" class="messages" tabindex="0" aria-label="本章已保存的问答" aria-live="polite"></div><form id="chat-form"><label class="sr-only" for="question">向学习助手提问</label><textarea id="question" disabled rows="3" maxlength="3000" placeholder="哪里还没理解？写下你的问题…" required></textarea><div class="chat-footer"><span id="chat-hint">需要连接模型</span><button class="button primary small" id="ask-button" disabled type="submit">提问 <span aria-hidden="true">↑</span></button></div></form></section>
+          </aside>
+        </div>
+        <footer class="page-footer">知章 · 让每一章都有自己的理解</footer>
+      </main>
+    </div>
+  </div>
+
+  <dialog id="chapter-dialog" class="wide-dialog" aria-labelledby="new-title">
+    <div class="dialog-heading"><div><div class="section-kicker">下一步，学什么？</div><h2 id="new-title">开始一个新章节</h2></div><button type="button" class="icon-button" data-close="chapter-dialog" aria-label="关闭新章节窗口">×</button></div>
+    <form id="chapter-form">
+      <div class="form-grid"><label>课程名称<input id="course-input" name="course" value="计算机网络" maxlength="100" required placeholder="例如：计算机网络"></label><label>教材名称与版本 <span class="optional">选填</span><input id="book-input" name="textbook" maxlength="300" placeholder="例如：你正在使用的教材和版本"></label></div>
+      <label>章节标题<input id="title-input" name="chapter" maxlength="200" required placeholder="例如：第三章 数据链路层"></label>
+      <fieldset class="mode-fieldset"><legend>从哪里开始整理？</legend><div class="mode-options"><label class="mode-option"><input type="radio" name="mode" value="material" checked><span><strong>根据我的资料</strong><small>上传教材、截图或粘贴笔记</small></span></label><label class="mode-option"><input type="radio" name="mode" value="topic"><span><strong>按章节标题讲解</strong><small>没有原文，先建立通用理解</small></span></label></div></fieldset>
+      <div id="material-fields">
+        <div class="upload-zone"><label for="file-input" class="upload-label"><span class="upload-symbol" aria-hidden="true">↑</span><span><strong id="upload-title">选择教材或笔记文件</strong><small>PDF、TXT、Markdown、PNG / JPG / WebP · 最大 20 MB</small></span></label><input id="file-input" type="file" accept=".pdf,.txt,.md,.png,.jpg,.jpeg,.webp"><p class="field-help">截图识别需要支持图片的模型；扫描版 PDF 请将所需页面截图后上传。</p></div>
+        <div id="material-preview" class="material-preview" hidden><div class="card-heading"><strong id="material-name"></strong><button class="text-button" type="button" id="remove-material">移除</button></div><div id="page-range" class="form-grid"><label>章节起始页<input id="page-start" type="number" min="1" value="1"></label><label>章节结束页<input id="page-end" type="number" min="1" value="1"></label></div><p class="field-help" id="material-info"></p><div id="material-warnings" class="field-warning"></div><details><summary>查看提取的文字</summary><div class="preview-controls"><label>预览第 <input id="preview-page" type="number" min="1" value="1"> 页</label><button type="button" id="preview-load" class="text-button">查看</button><button type="button" id="edit-extracted" class="text-button">改为编辑此页文字</button></div><pre id="preview-text"></pre></details></div>
+        <div id="outline-picker" class="outline-picker" hidden><label for="outline-select">从 PDF 书签选择章节<select id="outline-select"></select></label><button type="button" id="apply-outline" class="button secondary small">使用这一节</button><p class="field-help">填入书签标题与建议页码，之后仍可修改。书签只有起始页，结束页需要结合原文预览确认。</p><p id="outline-status" class="field-warning" role="status" hidden></p></div>
+        <label>章节正文或补充笔记<textarea id="text-input" name="text" rows="5" maxlength="90000" placeholder="也可以直接粘贴这一章的正文。上传资料后，这里的文字会作为补充笔记一起整理。"></textarea></label>
+      </div>
+      <p id="topic-help" class="field-warning" hidden>助手将根据标题提供通用讲解，不会假称读过这本教材。需要与教材逐项对应时，请使用资料模式。</p>
+      <div class="form-grid"><label>这次学习的目标<select id="goal-input" name="goal"><option value="understand">理解原理</option><option value="exam">复习备考</option><option value="practice">实际应用</option></select></label><label>目前的基础<select id="level-input" name="level"><option value="beginner">刚开始学，请解释术语</option><option value="intermediate">有一定基础，可以深入一些</option></select></label></div>
+      <p id="generation-error" class="form-error" role="alert" hidden></p><button id="configure-from-chapter" type="button" class="text-button">配置或更换模型服务 ↗</button><div class="dialog-footer"><p>将生成知识点、例题、类比和自测。<br><span>生成时，所选资料会发送到你配置的模型服务。</span></p><button id="generate-button" type="submit" class="button primary">整理这一章 <span aria-hidden="true">→</span></button></div>
+    </form>
+  </dialog>
+
+  <dialog id="data-dialog" class="wide-dialog" aria-labelledby="data-title">
+    <div class="dialog-heading"><div><div class="section-kicker">让学过的内容，留在自己手里</div><h2 id="data-title">备份与恢复</h2></div><button type="button" class="icon-button" data-close="data-dialog" aria-label="关闭备份与恢复">×</button></div>
+    <p class="dialog-intro">备份已保存的章节、来源片段、笔记、自测结果、追问和成长记录。模型设置、密钥、原始文件及未完成任务不包含在内。备份中有你的学习资料，请妥善保管。</p>
+    <section class="backup-section" aria-labelledby="backup-export-title"><h3 id="backup-export-title">保存一份学习备份</h3><p>导出为 JSON 文件，可在另一台电脑的知章中导入。当前章节的笔记会先保存。</p><button type="button" id="backup-export" class="button primary">导出学习备份</button></section>
+    <section class="backup-section" aria-labelledby="backup-import-title"><h3 id="backup-import-title">从备份合并学习记录</h3><p>先选择文件查看导入预览。现有记录保留；同一章节的内容不同时，新增「导入副本」。相同备份重复导入会跳过已导入的记录。</p><label for="backup-file">选择 JSON 备份文件<input id="backup-file" type="file" accept=".json,application/json"></label><p class="field-help">单份最大 30 MB，最多 1000 章。导入后，可以重新配置模型继续追问。旧版学习备份仍可导入；新版备份需要使用更新后的程序。</p><div id="backup-preview" class="backup-preview" hidden><p id="backup-preview-summary"></p><p id="backup-rewards-summary" class="field-help"></p><ul id="backup-preview-list"></ul><p class="field-help">预览最多列出前 20 章；点击导入会处理这份备份中的全部章节与成长记录。</p></div><button type="button" id="backup-import" class="button secondary" disabled>合并导入，保留现有记录</button></section>
+    <p id="backup-status" class="field-help" role="status"></p><p id="backup-error" class="form-error" role="alert" hidden></p><p id="backup-success" class="form-success" role="status" hidden></p>
+  </dialog>
+
+  <dialog id="review-dialog" class="wide-dialog" aria-labelledby="review-title">
+    <div class="dialog-heading"><div><div class="section-kicker">把没弄懂的，再想一遍</div><h2 id="review-title">错题复习</h2></div><button type="button" class="icon-button" data-close="review-dialog" aria-label="关闭错题复习">×</button></div>
+    <div class="review-toolbar"><p id="review-summary" role="status" tabindex="-1">正在读取错题…</p><button type="button" id="refresh-review" class="button secondary small">刷新错题</button></div>
+    <p class="field-help">汇集每道题最近一次答错的记录。重新答对后，从待复习列表移除；本次结果保留到刷新或关闭窗口。</p>
+    <p id="review-error" class="form-error" role="alert" hidden></p>
+    <div id="review-list" aria-busy="false"></div>
+    <div id="review-pages" class="review-pages" aria-label="错题翻页" hidden><button id="review-prev" class="button secondary small" type="button">上一页</button><span id="review-page-label" role="status"></span><button id="review-next" class="button secondary small" type="button">下一页</button></div>
+  </dialog>
+
+  <dialog id="settings-dialog" aria-labelledby="settings-title">
+    <div class="dialog-heading"><div><div class="section-kicker">连接你的学习伙伴</div><h2 id="settings-title">模型设置</h2></div><button class="icon-button" data-close="settings-dialog" aria-label="关闭模型设置">×</button></div>
+    <p class="dialog-intro">使用兼容 Chat Completions 的模型服务，也可以连接本机模型。示例阅读和练习无需配置。</p>
+    <form id="settings-form"><label>服务地址<input id="base-url" type="url" placeholder="https://你的服务地址/v1" required autocomplete="off"><span class="field-help">填写服务商提供的 API 基础地址。本机服务允许 http://127.0.0.1:端口/v1。</span></label><label>模型名称<input id="model-name" required maxlength="200" placeholder="填写服务商提供的模型 ID" autocomplete="off"></label><label>API 密钥<input id="api-key" type="password" maxlength="2000" placeholder="本机无密钥服务可以留空" autocomplete="new-password"><span id="key-help" class="field-help">密钥仅保存在本机后端配置文件中，不会返回给网页。请勿分享 data 文件夹。</span></label><p id="settings-error" class="form-error" role="alert" hidden></p><p id="settings-success" class="form-success" role="status" hidden></p><div class="dialog-footer"><button id="test-model" type="button" class="button secondary">测试已保存的连接</button><button id="save-settings" type="submit" class="button primary">保存设置</button></div></form>
+  </dialog>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <dialog id="course-dialog" class="wide-dialog course-dialog" aria-labelledby="course-title">
+    <div class="dialog-heading"><div><div class="section-kicker">学懂原理，再用练习检验</div><h2 id="course-title">计算机网络 · 完整学习路径</h2></div><button type="button" class="icon-button" data-close="course-dialog" aria-label="关闭课程目录">×</button></div>
+    <div class="course-selector" role="group" aria-label="选择学习路径"><button type="button" class="button secondary small" data-course-catalog="microclass" aria-pressed="false">微课堂前三章</button><button type="button" class="button secondary small" data-course-catalog="network" aria-pressed="true">原完整课程</button></div>
+    <p id="course-intro" class="dialog-intro">24 课 · 72 道自测。按知识点 → 例题 → 类比 → 自测学习，离线可用。</p>
+    <details class="course-about"><summary>课程范围与学习建议</summary><p id="course-about-text"></p><p id="microclass-source" hidden><a href="https://www.bilibili.com/video/BV1c4411d7jb/" target="_blank" rel="noopener noreferrer">原视频：计算机网络微课堂 ↗</a> · 配套原创解析，尚未逐节核对视频字幕。</p></details>
+    <div class="course-summary"><p id="course-summary" role="status">正在读取学习进度…</p><progress id="course-progress" max="24" value="0" aria-label="标记学完的课时"></progress><p class="field-help">完成标记与答题正确数分开统计。</p></div>
+    <div class="course-actions"><button id="course-continue" class="button primary" type="button" disabled>从第一课开始</button><button class="button secondary" type="button" data-network-exam="1">综合练习一 · 12 题</button><button class="button secondary" type="button" data-network-exam="2">综合练习二 · 12 题</button></div>
+    <div class="course-filters"><label>查找课时或知识点<input id="course-search" type="search" placeholder="例如：子网、TCP、DNS" maxlength="200"></label><label>学习状态<select id="course-filter"><option value="all">全部课时</option><option value="unfinished">尚未学完</option><option value="started">已开始</option><option value="wrong">有错题</option><option value="completed">已学完</option></select></label></div>
+    <p id="course-error" class="form-error" role="alert" hidden></p><button id="course-retry" class="text-button" type="button" hidden>重新读取课程</button>
+    <div id="course-lessons" aria-busy="false"></div>
+  </dialog>
+  <dialog id="network-labs-dialog" class="wide-dialog" aria-labelledby="network-labs-title">
+    <div class="dialog-heading"><div><div class="section-kicker">改一个参数，算清每一步</div><h2 id="network-labs-title">计算实验室</h2></div><button type="button" class="icon-button" data-close="network-labs-dialog" aria-label="关闭计算实验室">×</button></div>
+    <p class="dialog-intro">确定性计算与逐步解释，不调用 AI，不扫描网络，也不修改电脑的网络设置。</p>
+    <form id="network-lab-form">
+      <label>选择实验<select id="network-lab-type"><option value="subnet">IPv4 子网划分</option><option value="delay">存储转发与时延</option><option value="crc">CRC 模二除法</option></select></label>
+      <fieldset data-lab="subnet"><legend>从主机地址找到所属子网</legend><label>IPv4 地址 / 前缀<input name="address" value="192.168.1.70/26" maxlength="50" required spellcheck="false"></label><p class="field-help">同时支持 /31 点对点端点与 /32 单地址解释。</p></fieldset>
+      <fieldset data-lab="delay" hidden disabled><legend>各跳等长、等速率的理想模型</legend><div class="form-grid"><label>每包大小（Byte）<input name="bytes" type="number" value="1500" min="1" max="1000000000" required></label><label>每跳速率（Mbps）<input name="mbps" type="number" value="10" min="0.000001" max="1000000" step="any" required></label><label>每跳距离（km）<input name="distance_km" type="number" value="1000" min="0" max="1000000" step="any" required></label><label>传播速度（m/s）<input name="speed" type="number" value="200000000" min="0.000001" max="300000000" step="any" required></label><label>链路跳数<input name="hops" type="number" value="1" min="1" max="100" required></label><label>等长分组数<input name="packets" type="number" value="1" min="1" max="1000000" required></label></div><p class="field-help">忽略头部、处理、排队和重传；时间从第一个包开始发送，到最后一个包完全到达。</p></fieldset>
+      <fieldset data-lab="crc" hidden disabled><legend>不含标准 CRC 初值与反射的教学模型</legend><label>原始数据（1～256 位二进制）<input name="data" value="1101" pattern="[01]{1,256}" maxlength="256" required spellcheck="false"></label><label>生成式（二进制，首尾为 1，2～32 位）<input name="generator" value="1011" pattern="1[01]{0,30}1" maxlength="32" required spellcheck="false"></label></fieldset>
+      <button id="network-lab-calculate" class="button primary" type="submit">计算并解释</button>
+    </form>
+    <p id="network-lab-error" class="form-error" role="alert" hidden></p><section id="network-lab-result" class="lab-result" aria-live="polite" hidden><h3 id="network-lab-result-title"></h3><ol id="network-lab-steps"></ol></section>
+  </dialog>
+  <dialog id="rewards-dialog" class="wide-dialog" aria-labelledby="rewards-title">
+    <div class="dialog-heading"><div><div class="section-kicker">每一次理解，都在积累</div><h2 id="rewards-title">我的学习成长</h2></div><button type="button" class="icon-button" data-close="rewards-dialog" aria-label="关闭学习成长">×</button></div>
+    <div id="rewards-content" aria-busy="false"><div class="growth-hero"><span class="growth-emblem" aria-hidden="true">✦</span><div><p id="growth-level">正在读取成长记录…</p><h3 id="growth-points">—</h3><p id="growth-next"></p></div></div><progress id="growth-progress" max="100" value="0" aria-label="当前等级进度"></progress><section class="daily-practice"><div><h3>今天，巩固一点</h3><p id="growth-daily">答对 3 道不同的课程题，完成今日小目标。</p></div><span id="growth-daily-count">0 / 3</span><div class="practice-action"><p id="practice-recommendation" class="field-help"></p><button id="start-daily-practice" class="button primary small" type="button" disabled>开始今日练习</button></div></section><h3 class="growth-badges-title">成长徽章</h3><div id="growth-badges" class="growth-badges"></div></div>
+    <p id="rewards-error" class="form-error" role="alert" hidden></p><button id="rewards-retry" class="text-button" type="button" hidden>重新读取成长记录</button>
+    <details class="reward-rules"><summary>积分怎么获得？</summary><p>原完整课程与微课堂中，每道题首次答对 +10 分；一课全部题目答对额外 +20 分，每项仅奖励一次。重复答题、综合卷、打开章节和完成标记不重复加分；后来答错也不扣已得积分。</p><p>当天答对的不同课程题计入练习量，复习旧题也算，日期按本机时间。每日目标只作鼓励，不强制连续打卡、不因中断扣分。原有五枚徽章按原完整课程统计；微课堂进度在专区单独显示。积分和徽章不是考试分数或掌握证明。</p><p>成长记录保存在本机，并包含在新版 JSON 学习备份中。导入按奖励事件和每日题目去重，不重复增加积分；旧版备份不含成长数据，会保留本机已有积分。含微课堂奖励的备份需要用更新版恢复。引入奖励前的作答不追溯加分，再次正确作答可领取首次奖励。</p></details>
+  </dialog>
+  <div id="reward-notice" class="reward-notice" role="status" hidden></div>
+</body>
+</html>
