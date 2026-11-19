@@ -4,6 +4,8 @@
 
 **技术栈：Python · FastAPI · SQLite · 原生 JavaScript**
 
+[在线体验四科课程与实验](https://zhizhang-core-courses.nuttsmidt.chatgpt.site) · [使用与实现说明](docs/CORE_COURSES.md) · [实际验收记录](docs/FOUR_SUBJECT_IMPLEMENTATION.md)
+
 ![四科课程与实验首页](docs/screenshots/academy-home.png)
 
 四门科目共 60 节课时、288 道自测（含保留的计网微课堂路径）。新增三科各 8 节核心导学、32 道自测，非指定教材或考试大纲的完整覆盖。

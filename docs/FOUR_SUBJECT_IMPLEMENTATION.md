@@ -50,4 +50,12 @@ python -m tests.academy_browser
 
 新增三科内容为核心导学，包含独立可复算的例题。自动检查验证了结构、引用标识、答案索引和部分数值事实；不等于教师逐题审核，也未进行真实学生学习效果实验。自愿试用方案另见 `CORE_COURSES_TRYOUT.md`。
 
-公开版从已提交主项目的受控静态文件生成；部署地址和源码版本在发布成功后记录。
+## 公开发布
+
+- 在线体验：[知章四科课程与实验](https://zhizhang-core-courses.nuttsmidt.chatgpt.site)。Sites 返回发布成功，访问范围为公开。
+- 功能源码提交：`d82c4b79478534917f861b1c82a052961da6b5cd`。
+- Sites 源码提交：`95ca8ec6cf886835c33e88d5312d1b72cab693a5`，静态包由干净主项目生成，`source_dirty=false`。
+- 发布版本：1。公开包的主项目来源与课程摘要可查看站点 `build-info.json`。
+- GitHub 自动检查：[运行记录](https://github.com/feng0sp/learning-assistant/actions/runs/44486551512)，后端、实验规则、浏览器三个检查任务通过。
+
+公开版只包含已验证的共享静态模块与规范课程内容，不包含用户数据库或模型配置。文档、链接的后续补充不改变上述功能源码版本。
