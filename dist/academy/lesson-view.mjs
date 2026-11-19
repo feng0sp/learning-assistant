@@ -1,0 +1,14 @@
+export const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const e=escapeHTML;
+const list = items => `<ul>${items.map(x=>`<li>${e(x)}</li>`).join('')}</ul>`;
+
+export function renderGuide(lesson) {
+  const g=lesson.guide;
+  return `<section class="overview"><span class="eyebrow">本节导读</span><p>${e(g.overview)}</p><details><summary>学习目标与前置知识</summary>${list(g.objectives)}<p class="muted">前置知识</p>${list(g.prerequisites)}</details></section>
+  <section id="concepts"><div class="section-heading"><h2>先理解原理</h2><span>${g.knowledge_points.length} 个知识点</span></div>${g.knowledge_points.map(p=>`<article class="concept"><h3>${e(p.title)}</h3><p>${e(p.explanation)}</p><div class="takeaway">${e(p.key_takeaway)}</div><details><summary>容易混淆的地方</summary>${list(p.pitfalls)}</details></article>`).join('')}</section>
+  <section id="examples"><div class="section-heading"><h2>跟着推导一次</h2><span>先尝试，再展开步骤</span></div>${g.worked_examples.map(x=>`<article class="concept example"><h3>${e(x.title)}</h3><p>${e(x.question)}</p><details><summary>查看推导与答案</summary><ol>${x.steps.map(s=>`<li>${e(s)}</li>`).join('')}</ol><p class="answer">${e(x.answer)}</p><p class="muted">检查点：${e(x.mistake)}</p></details></article>`).join('')}</section>
+  <details class="concept"><summary>换个角度理解：生活类比</summary>${g.analogies.map(a=>`<h3>${e(a.concept)}</h3><p>${e(a.scene)}</p>${list(a.mapping)}<p class="muted">类比边界：${e(a.limitation)}</p>`).join('')}</details>
+  <section id="quiz"><div class="section-heading"><h2>闭卷检查一下</h2><span>提交后显示解析，可再次作答</span></div>${g.quiz.map((q,i)=>`<form class="quiz-card" data-quiz="${i}"><fieldset><legend>${i+1}. ${e(q.question)}</legend>${q.options.map((option,j)=>`<label class="option"><input type="radio" name="q${i}" value="${j}" required><span>${String.fromCharCode(65+j)}. ${e(option)}</span></label>`).join('')}</fieldset><div class="quiz-bottom"><button class="button small" type="submit">检查答案</button><span class="quiz-feedback" id="feedback-${i}" aria-live="polite"></span></div></form>`).join('')}</section>
+  <section id="notes" class="concept"><div class="section-heading"><h2>留下自己的理解</h2><span id="notes-state">尚未修改</span></div><label for="lesson-notes">笔记</label><textarea id="lesson-notes" maxlength="30000" rows="6" placeholder="用自己的话记录推导、疑问或实验观察…">${e(lesson.notes || '')}</textarea><div class="button-row"><button class="button" id="save-notes">保存笔记</button><button class="button quiet" id="download-draft">下载笔记草稿</button><button class="button quiet" id="reload-notes" hidden>读取已保存笔记</button></div><p id="notes-error" class="error" role="alert" hidden></p></section>
+  <details class="concept sources"><summary>资料依据与课程范围</summary><p>原创导学和练习，不是教材全文或独立考试测评。来源用于核对与延伸阅读。</p>${(lesson.sources||[]).map(s=>`<h3>${e(s.label)}</h3><pre>${e(s.text)}</pre>`).join('')}</details>`;
+}

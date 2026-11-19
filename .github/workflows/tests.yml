@@ -11,4 +11,26 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install -r requirements.txt
-      - run: python -m unittest tests.test_app
+      - run: python -m unittest tests.test_app tests.network_course_check tests.microclass_check tests.academy_check
+      - name: Check exported canonical course bundle
+        run: |
+          python scripts/export_academy.py
+          git diff --exit-code -- dist/academy/courses.json
+  experiments:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/academy_engines.test.mjs
+  browser:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install -r requirements-dev.txt
+      - run: python -m playwright install --with-deps chromium
+      - run: python -m tests.academy_browser

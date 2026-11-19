@@ -14,7 +14,7 @@
     $('#growth-daily').textContent = data.today >= data.daily_goal ? `今日小目标已完成，已答对 ${data.today} 道不同课程题。` : `今天已答对 ${data.today} 道不同课程题，还差 ${data.daily_goal - data.today} 道。复习旧题也算。`;
     $('.daily-practice').classList.toggle('achieved', data.today >= data.daily_goal);
     const practice = data.next_practice;
-    $('#practice-recommendation').textContent = practice ? `${practice.course_id === 'microclass' ? '微课堂 · ' : ''}${practice.reason}：${practice.title}` : '暂无待推荐的课程题，按自己的节奏休息或从目录选择复习吧。';
+    $('#practice-recommendation').textContent = practice ? `${practice.course_title || ''} · ${practice.reason}：${practice.title}` : '暂无待推荐的课程题，按自己的节奏休息或从目录选择复习吧。';
     $('#start-daily-practice').disabled = !practice || $('#start-daily-practice').dataset.opening === 'true';
     $('#start-daily-practice').dataset.practiceLesson = practice?.chapter_id || '';
     $('#start-daily-practice').dataset.practiceQuestion = practice?.question_index ?? '';

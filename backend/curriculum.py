@@ -1,15 +1,15 @@
 """Canonical rewardable courses; legacy question positions remain unchanged."""
 from functools import lru_cache
-from . import network_course, microclass
+from . import course_registry
 
 
 @lru_cache(maxsize=1)
 def all_lessons():
-    return {**network_course.validated_lessons(), **microclass.validated_lessons()}
+    return course_registry.all_lessons()
 
 
 def course_id(chapter_id):
-    return 'microclass' if chapter_id in microclass.validated_lessons() else 'network'
+    return course_registry.course_id(chapter_id)
 
 
 def reward_capacity():

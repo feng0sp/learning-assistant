@@ -9,7 +9,19 @@
   let labRevision = 0;
   let calculating = false;
   let catalogFrame;
-  const courseOf = id => id?.startsWith('micro-v1-') ? 'microclass' : 'network';
+  let registry = null;
+  let registryLoading = null;
+  const courseOf = id => registry?.courses.find(path => path.lesson_ids.includes(id) || path.exam_ids.includes(id))?.id || null;
+  async function loadRegistry() {
+    if (registry) return registry;
+    if (!registryLoading) registryLoading = api('/courses').then(value => {
+      registry = value;
+      $('#course-paths').innerHTML = value.subjects.map(subject => `<div class="subject-path"><strong>${escapeHTML(subject.title)}</strong>${value.courses.filter(path => path.subject_id === subject.id).map(path => `<button type="button" class="button secondary small" data-course-catalog="${escapeHTML(path.id)}" aria-pressed="false">${escapeHTML(path.id === 'network' ? '原完整课程' : path.id === 'microclass' ? '微课堂前三章' : '核心导学')}</button>`).join('')}</div>`).join('');
+      renderCourseHeader();
+      return value;
+    }).finally(() => { registryLoading = null; });
+    return registryLoading;
+  }
 
   function courseBusy(busy) {
     opening = busy;
@@ -52,13 +64,13 @@
   }
 
   function renderCourseHeader() {
-    const micro = selectedCourse === 'microclass';
-    $('#course-title').textContent = micro ? '微课堂前三章 · 学懂再练' : '计算机网络 · 完整学习路径';
-    $('#course-intro').textContent = micro ? '概述、物理层、数据链路层 · 12 小节 · 120 道选择题与逐项解析。' : '24 课 · 72 道自测。按知识点 → 例题 → 类比 → 自测学习，离线可用。';
-    $('#course-about-text').textContent = micro ? '配套原创解析，尚未逐节核对视频字幕。参考可读取的课程公开资料及协议标准，不是视频逐字稿。每小节含 5 个知识点、2 道分步例题、生活类比和 10 道选择题；约 35 分钟，可按自己的节奏学习。' : '按本科通用体系组织的原创精讲，不对应某本教材的固定页码。每课含知识点、例题、类比和 3 道自测。两套综合练习使用课内题目交错组卷，适合复习而非独立考试测评。';
-    $('#microclass-source').hidden = !micro;
-    $('#course-search').placeholder = micro ? '例如：CRC、编码、ARP' : '例如：子网、TCP、DNS';
-    $$('[data-network-exam]').forEach(button => { button.hidden = micro; });
+    const path = registry?.courses.find(item => item.id === selectedCourse);
+    $('#course-title').textContent = path?.title || '正在读取课程';
+    $('#course-intro').textContent = path?.intro || '';
+    $('#course-about-text').textContent = path?.about || '';
+    $('#microclass-source').hidden = selectedCourse !== 'microclass';
+    $('#course-search').placeholder = path?.search_hint || '搜索知识点';
+    $$('[data-network-exam]').forEach(button => { button.hidden = !path?.exam_ids.length; });
     $$('[data-course-catalog]').forEach(button => button.setAttribute('aria-pressed', String(button.dataset.courseCatalog === selectedCourse)));
   }
 
@@ -76,6 +88,7 @@
       $('#course-retry').hidden = true;
     }
     try {
+      await loadRegistry();
       const result = await api('/course/' + id);
       catalogs.set(id, result);
       if (selectedCourse === id) { course = result; renderCatalog(); }
@@ -170,7 +183,7 @@
     if (chapter?.id.startsWith('micro-v1-')) {
       $('#mode-badge').textContent = '微课堂配套原创';
       $('#demo-notice p').textContent = '配套原创解析，尚未逐节核对视频字幕。不是视频逐字稿；每小节的“资料来源”列有参考资料与原视频链接。讲解和自测离线可用。';
-    } else if (chapter?.id.startsWith('net-v1-') || chapter?.id.startsWith('net-exam-v1-')) {
+    } else if (courseOf(chapter?.id)) {
       $('#mode-badge').textContent = '内置原创课程';
       $('#demo-notice p').textContent = '这是知章编写的本科通用课程讲义与原创练习，非教材原文。可离线学习；需要对齐课本时，仍可通过“开始新章节”导入资料。';
     } else {
@@ -180,11 +193,14 @@
 
   $('#open-course').addEventListener('click', () => openCourse('network'));
   $('#open-microclass').addEventListener('click', () => openCourse('microclass'));
-  $$('[data-course-catalog]').forEach(button => button.addEventListener('click', () => openCourse(button.dataset.courseCatalog)));
-  window.addEventListener('open-course-practice', event => {
+  window.addEventListener('open-course-practice', async event => {
     const {chapterId, questionIndex} = event.detail;
     if (typeof chapterId !== 'string' || !Number.isInteger(questionIndex) || questionIndex < 0) return;
-    openCourseItem('/course/' + courseOf(chapterId) + '/lessons/' + encodeURIComponent(chapterId) + '/open', false, questionIndex);
+    try {
+      await loadRegistry();
+      const id = courseOf(chapterId);
+      if (id) openCourseItem('/course/' + id + '/lessons/' + encodeURIComponent(chapterId) + '/open', false, questionIndex);
+    } catch (error) { showMessage('#rewards-error', error.message); }
   });
   $('#course-retry').addEventListener('click', () => fetchCourse());
   window.addEventListener('learning-data-imported', async () => {
@@ -199,6 +215,8 @@
   });
   $('#course-filter').addEventListener('change', renderCatalog);
   document.addEventListener('click', event => {
+    const path = event.target.closest('[data-course-catalog]');
+    if (path) openCourse(path.dataset.courseCatalog);
     const lesson = event.target.closest('[data-network-lesson]');
     if (lesson?.dataset.networkLesson && !lesson.disabled) openCourseItem('/course/' + courseOf(lesson.dataset.networkLesson) + '/lessons/' + encodeURIComponent(lesson.dataset.networkLesson) + '/open');
     const exam = event.target.closest('[data-network-exam]');
@@ -206,7 +224,10 @@
   });
   window.addEventListener('chapter-rendered', () => {
     renderReadingNav();
-    if ((state.chapter?.id.startsWith('net-v1-') || state.chapter?.id.startsWith('micro-v1-')) && !catalogs.has(courseOf(state.chapter.id))) fetchCourse(courseOf(state.chapter.id));
+    loadRegistry().then(() => {
+      const id = courseOf(state.chapter?.id);
+      if (id && !catalogs.has(id)) fetchCourse(id); else renderReadingNav();
+    }).catch(error => showMessage('#course-error', error.message));
   });
 
   $('#open-network-labs').addEventListener('click', () => $('#network-labs-dialog').showModal());

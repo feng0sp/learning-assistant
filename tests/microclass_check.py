@@ -174,7 +174,8 @@ class MicroclassTests(unittest.TestCase):
         self.assertFalse(any(b['earned'] for b in growth['badges']))
         document = self.client.get('/api/backups/export').json()
         self.assertEqual(len(document['rewards']), 132)
-        self.assertEqual(reward_capacity(), 228)
+        # Legacy 228 events plus 24 new core lessons × (4 answers + 1 milestone).
+        self.assertEqual(reward_capacity(), 348)
         with db() as conn:
             conn.execute("DELETE FROM chapters WHERE id LIKE 'micro-v1-%'")
             conn.execute('DELETE FROM learning_rewards')

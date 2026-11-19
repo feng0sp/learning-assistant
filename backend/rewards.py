@@ -5,6 +5,7 @@ from functools import lru_cache
 
 from .curriculum import all_lessons as validated_lessons, course_id
 from .network_course import validated_lessons as network_lessons
+from .course_registry import PATHS
 from .storage import db, now
 
 
@@ -54,7 +55,7 @@ def summary():
         original_answers = sum(row[0][7:].rsplit(':', 1)[0] in legacy for row in conn.execute("SELECT event_key FROM learning_rewards WHERE kind='answer'"))
         today = conn.execute('SELECT COUNT(*) FROM learning_days WHERE day=?', (day,)).fetchone()[0]
         practice = next_practice(conn, day)
-    levels = [(0, '探索新知'), (100, '渐入佳境'), (300, '融会贯通'), (600, '网络达人'), (1200, '学有所成')]
+    levels = [(0, '探索新知'), (100, '渐入佳境'), (300, '融会贯通'), (600, '循序精进'), (1200, '学有所成')]
     level = max(i for i, (threshold, _) in enumerate(levels) if points >= threshold)
     badges = [('first', '迈出第一步', '首次答对一道原完整课程题', original_answers >= 1),
               ('lesson', '理解一课', '原完整课程一课三题全部答对', original_lessons >= 1),
@@ -68,6 +69,8 @@ def summary():
 
 
 def next_practice(conn, day):
+    path_order = {path['id']: index for index, path in enumerate(PATHS)}
+    path_titles = {path['id']: path['title'] for path in PATHS}
     completed_today = {row[0] for row in conn.execute('SELECT question_key FROM learning_days WHERE day=?', (day,))}
     lesson_ids = tuple(validated_lessons())
     placeholders = ','.join('?' for _ in lesson_ids)
@@ -87,6 +90,7 @@ def next_practice(conn, day):
                 continue
             reason = '先巩固这道错题' if wrong else ('试试这道未作答的题' if (chapter_id, index) not in answered else '再巩固一道课程题')
             course = course_id(chapter_id)
-            candidate = {'chapter_id': chapter_id, 'course_id': course, 'question_index': index, 'title': lesson['title'], 'reason': reason}
-            candidates.append(((not wrong, key in earned, course != 'network', lesson['number'], index), candidate))
+            candidate = {'chapter_id': chapter_id, 'course_id': course, 'course_title': path_titles[course],
+                         'question_index': index, 'title': lesson['title'], 'reason': reason}
+            candidates.append(((not wrong, key in earned, path_order[course], lesson['number'], index), candidate))
     return min(candidates, key=lambda item: item[0])[1] if candidates else None

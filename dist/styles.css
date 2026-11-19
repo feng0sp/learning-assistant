@@ -52,3 +52,5 @@ dialog{border:1px solid #dfe6ea;border-radius:15px;padding:29px;width:min(540px,
 
 /* Companion curriculum: compact selection, readable option-by-option feedback. */
 .course-selector{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.course-selector button{white-space:normal}.course-selector [aria-pressed=true]{background:var(--teal);border-color:var(--teal);color:#fff}.course-launch>div{min-width:0}.course-launch .course-actions{max-width:520px}.quiz-feedback p{white-space:pre-line}#microclass-source{overflow-wrap:anywhere}
+
+.subject-path{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;border:1px solid #d8e5e2;border-radius:8px;padding:.6rem}.subject-path strong{font-size:.875rem}.course-selector{flex-wrap:wrap}.course-actions a{text-decoration:none}

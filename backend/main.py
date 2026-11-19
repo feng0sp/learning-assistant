@@ -15,7 +15,7 @@ from pypdf import PdfReader
 from starlette.concurrency import run_in_threadpool
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
-from . import ai, backups, network_course, network_labs, rewards, microclass
+from . import ai, backups, network_course, network_labs, rewards, microclass, course_registry
 from .handout import render_handout
 from .models import AttemptInput, GenerateRequest, NotesInput, ProgressInput, QuestionInput, SettingsInput
 from .storage import DATA, ROOT, db, dumps, get_chapter, initialize, now
@@ -375,6 +375,27 @@ def network_delay(value: network_labs.DelayInput):
 @app.post('/api/course/network/labs/crc')
 def network_crc(value: network_labs.CRCInput):
     return network_labs.crc(value)
+
+
+@app.get('/api/courses')
+def registered_courses():
+    return course_registry.metadata()
+
+
+@app.get('/api/course/{course_id}')
+def registered_catalog(course_id: str):
+    try:
+        return course_registry.catalog(course_id)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
+
+
+@app.post('/api/course/{course_id}/lessons/{lesson_id}/open')
+def registered_open_lesson(course_id: str, lesson_id: str):
+    try:
+        return course_registry.open_lesson(course_id, lesson_id)
+    except ValueError as exc:
+        raise HTTPException(404, str(exc)) from exc
 
 
 @app.get("/api/chapters")
